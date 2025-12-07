@@ -1,0 +1,11 @@
+write-kubeconfig-mode: "0644"
+token: "{{ k3s_token }}"
+disable:
+  - servicelb
+  - traefik
+  - local-storage
+{% if inventory_hostname == 'homelab0' %}
+cluster-init: true
+{% else %}
+server: "{{ k3s_server_location }}"
+{% endif %}
