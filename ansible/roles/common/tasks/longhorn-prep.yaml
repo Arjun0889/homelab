@@ -1,0 +1,33 @@
+---
+# Longhorn Prerequisites
+- name: Install Longhorn dependencies
+  ansible.builtin.apt:
+    name:
+      - open-iscsi
+      - nfs-common
+      - util-linux
+    state: present
+
+- name: Ensure iscsid is enabled and started
+  ansible.builtin.service:
+    name: iscsid
+    state: started
+    enabled: true
+
+- name: Load required kernel modules for Longhorn
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - iscsi_tcp
+    - nvme_tcp
+
+- name: Ensure kernel modules load on boot
+  ansible.builtin.lineinfile:
+    path: /etc/modules-load.d/longhorn.conf
+    line: "{{ item }}"
+    create: true
+    mode: '0644'
+  loop:
+    - iscsi_tcp
+    - nvme_tcp

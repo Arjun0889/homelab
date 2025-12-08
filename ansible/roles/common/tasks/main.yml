@@ -22,6 +22,7 @@
       - stow
       - curl
       - unzip
+      - util-linux
     state: present
     update_cache: true
 
@@ -49,3 +50,7 @@
     dest: /etc/iscsi/initiatorname.iscsi
     mode: '0644'
   notify: Restart iscsid
+
+# Include Longhorn preparation tasks
+- name: Include Longhorn prerequisites
+  ansible.builtin.include_tasks: longhorn-prep.yml

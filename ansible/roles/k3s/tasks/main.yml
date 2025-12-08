@@ -17,6 +17,10 @@
     dest: /etc/rancher/k3s/config.yaml
     mode: '0644'
 
+# Include containerd configuration
+- name: Include containerd configuration
+  ansible.builtin.include_tasks: containerd-config.yml
+
 - name: Install K3s
   ansible.builtin.command:
     cmd: /tmp/k3s_install.sh
@@ -30,3 +34,9 @@
     name: k3s
     state: started
     enabled: true
+
+- name: Wait for K3s to be ready
+  ansible.builtin.wait_for:
+    path: /etc/rancher/k3s/k3s.yaml
+    state: present
+    timeout: 120
