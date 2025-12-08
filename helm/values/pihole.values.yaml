@@ -1,0 +1,40 @@
+---
+# Upstream DNS server (your router)
+DNS1: "10.0.0.1"
+
+# Enable persistent storage for Pi-hole data
+persistentVolumeClaim:
+  enabled: true
+
+# Ingress for web UI
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/app-root: /admin
+  hosts:
+    - "pihole.home"
+
+# Web UI service with LoadBalancer
+serviceWeb:
+  loadBalancerIP: 10.0.0.250  # Second IP from MetalLB pool
+  annotations:
+    metallb.universe.tf/allow-shared-ip: pihole-svc
+  type: LoadBalancer
+
+# DNS service sharing same IP
+serviceDns:
+  loadBalancerIP: 10.0.0.250  # Same IP as web (shared)
+  annotations:
+    metallb.universe.tf/allow-shared-ip: pihole-svc
+  type: LoadBalancer
+
+# Single replica for homelab
+replicaCount: 1
+
+# Admin password
+# IMPORTANT: Password is stored in pihole.secrets.yaml (gitignored)
+# For new deployments, create pihole.secrets.yaml with:
+#   admin:
+#     password: "your-password-here"
+admin:
+  password: "CHANGE_ME"

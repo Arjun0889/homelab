@@ -1,4 +1,35 @@
 ---
+- name: Install common packages
+  ansible.builtin.apt:
+    name:
+      # Core utilities
+      - neovim
+      - git
+      - python3
+      - python3-pip
+      - curl
+      - unzip
+      - util-linux
+      - stow
+      # Networking utilities
+      - iputils-ping
+      - net-tools
+      - dnsutils
+      - traceroute
+      - tcpdump
+      - iptables
+      - conntrack
+      # Storage/NFS/iSCSI
+      - cifs-utils
+      - nfs-common
+      - open-iscsi
+      # Shell
+      - zsh
+      # Locale support
+      - locales
+    state: present
+    update_cache: true
+
 - name: Set timezone to America/New_York
   community.general.timezone:
     name: America/New_York
@@ -7,24 +38,6 @@
   community.general.locale_gen:
     name: en_US.UTF-8
     state: present
-
-- name: Install common packages
-  ansible.builtin.apt:
-    name:
-      - neovim
-      - git
-      - python3
-      - python3-pip
-      - cifs-utils
-      - nfs-common
-      - open-iscsi
-      - zsh
-      - stow
-      - curl
-      - unzip
-      - util-linux
-    state: present
-    update_cache: true
 
 - name: Create user arjun
   ansible.builtin.user:
@@ -40,16 +53,25 @@
     state: present
     key: "{{ user_ssh_key }}"
 
-- name: Disable UFW
-  community.general.ufw:
-    state: disabled
-
 - name: Set ISCSI Initiator Name
   ansible.builtin.copy:
     content: "InitiatorName=iqn.2016-04.com.open-iscsi:{{ inventory_hostname }}\n"
     dest: /etc/iscsi/initiatorname.iscsi
     mode: '0644'
   notify: Restart iscsid
+
+# Add cluster nodes to /etc/hosts for name resolution
+- name: Add homelab0 to /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "10.0.0.248 homelab0"
+    state: present
+
+- name: Add homelab1 to /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "10.0.0.78 homelab1"
+    state: present
 
 # Include Longhorn preparation tasks
 - name: Include Longhorn prerequisites

@@ -1,3 +1,4 @@
 inventory/group_vars/all/secrets.yml
 .retry
 *.retry
+notes/

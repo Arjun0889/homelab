@@ -1,0 +1,23 @@
+# External-DNS for Pi-hole
+# Fully automated - no manual intervention needed
+
+provider: pihole
+
+# extraArgs configuration is in externaldns.secrets.yaml (gitignored)
+# Helm replaces arrays instead of merging them, so all extraArgs must be in one file
+# For new deployments, create externaldns.secrets.yaml with:
+#   extraArgs:
+#     - --pihole-server=http://pihole-web.pihole-system.svc.cluster.local
+#     - --pihole-password=your-password-here
+
+policy: upsert-only
+txtOwnerId: "homelab"
+
+serviceAccount:
+  create: true
+
+sources:
+  - ingress
+
+domainFilters:
+  - home

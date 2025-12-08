@@ -5,17 +5,20 @@
     dest: /usr/local/bin/oh-my-posh
     mode: '0755'
 
-- name: Download Zoxide binary
-  ansible.builtin.get_url:
-    url: https://github.com/ajeetdsouza/zoxide/releases/latest/download/zoxide-x86_64-unknown-linux-musl.tar.gz
-    dest: /tmp/zoxide.tar.gz
-    mode: '0644'
+- name: Install Zoxide
+  ansible.builtin.shell:
+    cmd: curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+    creates: /home/arjun/.local/bin/zoxide
+  become: true
+  become_user: arjun
+  environment:
+    HOME: /home/arjun
 
-- name: Extract Zoxide
-  ansible.builtin.unarchive:
-    src: /tmp/zoxide.tar.gz
-    dest: /usr/local/bin
-    remote_src: true
+- name: Symlink Zoxide to /usr/local/bin
+  ansible.builtin.file:
+    src: /home/arjun/.local/bin/zoxide
+    dest: /usr/local/bin/zoxide
+    state: link
 
 - name: Clone FZF Repository
   ansible.builtin.git:
@@ -26,10 +29,10 @@
   become: true
   become_user: arjun
 
-- name: Install FZF binary
+- name: Install FZF with shell integrations
   ansible.builtin.command:
-    cmd: /home/arjun/.fzf/install --bin
-    creates: /home/arjun/.fzf/bin/fzf
+    cmd: /home/arjun/.fzf/install --all --no-update-rc
+    creates: /home/arjun/.fzf.zsh
   become: true
   become_user: arjun
 
@@ -39,13 +42,34 @@
     dest: /usr/local/bin/fzf
     state: link
 
+- name: Create oh-my-posh config directory
+  ansible.builtin.file:
+    path: /home/arjun/.ohmyposh
+    state: directory
+    owner: arjun
+    group: arjun
+    mode: '0755'
+  become: true
+  become_user: arjun
+
+- name: Install Zinit (zsh plugin manager)
+  ansible.builtin.shell:
+    cmd: |
+      mkdir -p "${HOME}/.local/share/zinit"
+      git clone https://github.com/zdharma-continuum/zinit.git "${HOME}/.local/share/zinit/zinit.git"
+    creates: /home/arjun/.local/share/zinit/zinit.git
+  become: true
+  become_user: arjun
+  environment:
+    HOME: /home/arjun
+
 # Dotfiles for arjun
 
 - name: Clone Dotfiles Repository
   ansible.builtin.git:
     repo: https://github.com/Arjun0889/dotfiles.git
     dest: /home/arjun/dotfiles
-    version: main
+    version: master
     force: true
   become: true
   become_user: arjun

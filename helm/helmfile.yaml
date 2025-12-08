@@ -1,0 +1,62 @@
+repositories:
+  - name: metallb
+    url: https://metallb.github.io/metallb
+  - name: longhorn
+    url: https://charts.longhorn.io
+  - name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+  - name: mojo2600
+    url: https://mojo2600.github.io/pihole-kubernetes/
+  - name: bitnami
+    url: https://charts.bitnami.com/bitnami
+  - name: kubernetes-sigs
+    url: https://kubernetes-sigs.github.io/external-dns/
+
+releases:
+  # Load balancer
+  - name: metallb
+    chart: metallb/metallb
+    namespace: metallb-system
+    version: 0.14.5
+    createNamespace: true
+
+  # Distributed storage
+  - name: longhorn
+    namespace: longhorn-system
+    chart: longhorn/longhorn
+    version: 1.6.2
+    createNamespace: true
+
+  # Ingress for local network
+  - name: ingress-nginx-internal
+    namespace: nginx-system
+    chart: ingress-nginx/ingress-nginx
+    version: 4.10.1
+    createNamespace: true
+    values:
+      - ./values/nginx-internal.values.yaml
+
+  # Automatic DNS for pihole
+  - name: externaldns-pihole
+    namespace: pihole-system
+    chart: kubernetes-sigs/external-dns
+    version: 1.15.0
+    createNamespace: true
+    values:
+      - ./values/externaldns.values.yaml
+      # Secret file (gitignored) - contains passwords not version controlled
+      # NOTE: Helm REPLACES arrays instead of merging them!
+      # All extraArgs must be in secrets file to include both server and password
+      - ./values/secrets/externaldns.yaml
+
+  # Pi-hole
+  - name: pihole
+    namespace: pihole-system
+    chart: mojo2600/pihole
+    version: 2.18.0
+    createNamespace: true
+    values:
+      - ./values/pihole.values.yaml
+      # Secret file (gitignored) - contains admin password not version controlled
+      # Helm deep merges objects, so secrets file overrides password from values.yaml
+      - ./values/secrets/pihole.yaml
