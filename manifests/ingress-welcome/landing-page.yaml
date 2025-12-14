@@ -1,0 +1,168 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: landing-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: landing-html
+  namespace: landing-system
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Arjun's Homelab</title>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .container {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 16px;
+                padding: 40px;
+                max-width: 600px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+            h1 { color: #2d3748; margin-bottom: 10px; font-size: 2.5em; text-align: center; }
+            .subtitle { color: #718096; text-align: center; margin-bottom: 40px; font-size: 1.1em; }
+            .service {
+                background: #f7fafc;
+                border: 2px solid #e2e8f0;
+                border-radius: 12px;
+                padding: 24px;
+                margin-bottom: 16px;
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
+            .service:hover {
+                border-color: #667eea;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            }
+            .service h2 { color: #2d3748; margin-bottom: 8px; font-size: 1.5em; }
+            .service p { color: #718096; margin-bottom: 12px; }
+            .service a { color: #667eea; text-decoration: none; font-weight: 600; font-size: 1.1em; }
+            .service a:hover { color: #764ba2; }
+            .service a::before { content: '→ '; }
+            .footer {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 2px solid #e2e8f0;
+                text-align: center;
+                color: #718096;
+                font-size: 0.9em;
+            }
+            .status {
+                display: inline-block;
+                background: #48bb78;
+                color: white;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-weight: 600;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🏠 Arjun's Homelab</h1>
+            <p class="subtitle">Available Services</p>
+            <div class="service" onclick="window.location.href='http://homepage.home'">
+                <h2>Homepage Dashboard</h2>
+                <p>Centralized dashboard for all homelab services</p>
+                <a href="http://homepage.home">homepage.home</a>
+            </div>
+            <div class="service" onclick="window.location.href='http://pihole.home'">
+                <h2>Pi-hole</h2>
+                <p>Network-wide ad blocking and DNS management</p>
+                <a href="http://pihole.home">pihole.home</a>
+            </div>
+            <div class="footer">
+                <p>Nginx Ingress <span class="status">✓ Online</span></p>
+                <p style="margin-top: 8px; font-size: 0.85em;">IP: 10.0.0.249 | K3s Cluster</p>
+            </div>
+        </div>
+    </body>
+    </html>
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: landing-page
+  namespace: landing-system
+  labels:
+    app: landing-page
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: landing-page
+  template:
+    metadata:
+      labels:
+        app: landing-page
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "16Mi"
+            cpu: "25m"
+          limits:
+            memory: "32Mi"
+            cpu: "50m"
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+          readOnly: true
+      volumes:
+      - name: html
+        configMap:
+          name: landing-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: landing-page
+  namespace: landing-system
+spec:
+  selector:
+    app: landing-page
+  ports:
+  - port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: landing-page
+  namespace: landing-system
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx-internal
+  rules:
+  - http:  # No host specified = catch-all for bare IP
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: landing-page
+            port:
+              number: 80

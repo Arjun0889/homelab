@@ -11,6 +11,8 @@ repositories:
     url: https://charts.bitnami.com/bitnami
   - name: kubernetes-sigs
     url: https://kubernetes-sigs.github.io/external-dns/
+  - name: jameswynn
+    url: https://jameswynn.github.io/helm-charts
 
 releases:
   # Load balancer
@@ -47,7 +49,7 @@ releases:
       # Secret file (gitignored) - contains passwords not version controlled
       # NOTE: Helm REPLACES arrays instead of merging them!
       # All extraArgs must be in secrets file to include both server and password
-      - ./values/secrets/externaldns.yaml
+      - ./secrets/externaldns.yaml
 
   # Pi-hole
   - name: pihole
@@ -59,4 +61,16 @@ releases:
       - ./values/pihole.values.yaml
       # Secret file (gitignored) - contains admin password not version controlled
       # Helm deep merges objects, so secrets file overrides password from values.yaml
-      - ./values/secrets/pihole.yaml
+      - ./secrets/pihole.yaml
+
+  # Homepage dashboard
+  - name: homepage
+    namespace: homepage-system
+    chart: jameswynn/homepage
+    version: 2.1.0
+    createNamespace: true
+    values:
+      - ./values/homepage.values.yaml
+      # Secret file (gitignored) - contains API keys not version controlled
+      # Helm deep merges objects, so secrets file overrides values from homepage.values.yaml
+      - ./secrets/homepage.yaml

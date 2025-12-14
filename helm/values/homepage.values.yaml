@@ -1,0 +1,226 @@
+---
+# Homepage Helm Chart Values
+# Chart: jameswynn/homepage
+# Docs: https://github.com/jameswynn/helm-charts/tree/main/charts/homepage
+
+# Image configuration
+image:
+  repository: ghcr.io/gethomepage/homepage
+  tag: latest
+  pullPolicy: Always
+
+# Controller type
+controller:
+  type: deployment
+  replicas: 1
+  strategy: RollingUpdate
+
+# Environment variables
+env:
+  HOMEPAGE_ALLOWED_HOSTS: "homepage.home"
+
+# Resource limits
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+
+# Service configuration
+service:
+  main:
+    enabled: true
+    type: ClusterIP
+    ports:
+      http:
+        port: 3000
+
+# Ingress configuration
+ingress:
+  main:
+    enabled: true
+    ingressClassName: nginx-internal
+    annotations:
+      nginx.ingress.kubernetes.io/rewrite-target: /
+    hosts:
+      - host: homepage.home
+        paths:
+          - path: /
+            pathType: Prefix
+
+# Enable ServiceAccount for Kubernetes integration
+serviceAccount:
+  create: true
+  name: homepage
+
+# Enable RBAC for Kubernetes integration
+enableRbac: true
+
+# RBAC for Kubernetes cluster access
+rbac:
+  create: true
+
+# Additional cluster-wide permissions
+extraClusterRoles:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - nodes
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+
+# Homepage configuration using chart's native config section
+config:
+  kubernetes:
+    mode: cluster
+  
+  settings:
+    title: Arjun's Homelab
+    favicon: https://github.com/walkxcode/dashboard-icons/blob/main/png/homer.png
+    theme: dark
+    color: slate
+    headerStyle: clean
+    hideVersion: true
+    background:
+      image: https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1920
+      blur: sm
+      saturate: 50
+      brightness: 50
+      opacity: 50
+    layout:
+      DNS & Network:
+        style: row
+        columns: 4
+      Infrastructure:
+        style: row
+        columns: 4
+      Monitoring:
+        style: row
+        columns: 4
+  
+  services:
+    - DNS & Network:
+      - Pi-hole:
+          icon: pi-hole.svg
+          href: "http://pihole.home"
+          description: Network-wide Ad Blocking
+          widget:
+            type: pihole
+            url: "{{HOMEPAGE_VAR_PIHOLE_URL}}"
+            key: "{{HOMEPAGE_VAR_PIHOLE_API_KEY}}"
+    
+    - Infrastructure:
+      - Longhorn:
+          icon: longhorn.svg
+          href: "http://longhorn.home"
+          description: Distributed Storage
+          namespace: longhorn-system
+          app: longhorn
+      
+      - MetalLB:
+          icon: metallb.png
+          description: Load Balancer
+          namespace: metallb-system
+          app: metallb
+  
+  widgets:
+    - resources:
+        cpu: true
+        memory: true
+        disk: /
+    
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: short
+          hour12: true
+    
+    - search:
+        provider: google
+        target: _blank
+  
+  bookmarks:
+    - Documentation:
+        - Homepage Docs:
+            - icon: si-homepage
+              href: https://gethomepage.dev
+        - K3s Docs:
+            - icon: si-kubernetes
+              href: https://docs.k3s.io
+    
+    - Development:
+        - Homelab GitHub:
+            - icon: si-github
+              href: https://github.com/Arjun0889/homelab
+        - Pi-hole Docs:
+            - icon: si-pihole
+              href: https://docs.pi-hole.net
+  
+  docker:
+
+# Persistence - not needed as we use ConfigMap
+persistence:
+  config:
+    enabled: false
+
+# Secrets - Homepage environment variables
+# These will be created as a Kubernetes Secret by Helm
+secrets:
+  homepage-secret:
+    enabled: true
+    stringData:
+      HOMEPAGE_VAR_PIHOLE_URL: "http://pihole-web.pihole-system.svc.cluster.local"
+      HOMEPAGE_VAR_PIHOLE_API_KEY: "CHANGE_ME"  # Override in secrets/homepage.yaml
+
+# Environment variables from Secret
+envFrom:
+  - secretRef:
+      name: homepage-homepage-secret  # Chart prefixes with release name
+
+# Probes
+probes:
+  liveness:
+    enabled: true
+    custom: true
+    spec:
+      httpGet:
+        path: /
+        port: 3000
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+  
+  readiness:
+    enabled: true
+    custom: true
+    spec:
+      httpGet:
+        path: /
+        port: 3000
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 5

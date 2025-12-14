@@ -15,4 +15,10 @@ Thumbs.db
 *.tmp
 *~
 
+# Helm secrets
+helm/secrets/*.yaml
+!helm/secrets/examples/
+!helm/secrets/README.md
+
 notes/
+docs/

@@ -1,5 +1,0 @@
-# Secret values files - Keep these local only!
-# These files contain sensitive passwords and should never be committed to git
-values/secrets/*
-!values/secrets/*.example
-!values/secrets/README.md
