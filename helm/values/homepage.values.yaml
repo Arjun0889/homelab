@@ -6,7 +6,7 @@
 # Image configuration
 image:
   repository: ghcr.io/gethomepage/homepage
-  tag: latest
+  tag: v0.9.13
   pullPolicy: Always
 
 # Controller type
@@ -118,6 +118,9 @@ config:
       Monitoring:
         style: row
         columns: 4
+      Automation:
+        style: row
+        columns: 4
   
   services:
     - DNS & Network:
@@ -143,6 +146,18 @@ config:
           description: Load Balancer
           namespace: metallb-system
           app: metallb
+
+    - Automation:
+      - n8n:
+          icon: n8n.png
+          href: "http://n8n.home"
+          description: Workflow Automation
+          namespace: n8n-system
+          app: n8n
+          widget:
+            type: n8n
+            url: http://n8n.n8n-system.svc.cluster.local
+            key: "{{HOMEPAGE_VAR_N8N_API_KEY}}"
   
   widgets:
     - resources:
@@ -193,6 +208,7 @@ secrets:
     stringData:
       HOMEPAGE_VAR_PIHOLE_URL: "http://pihole-web.pihole-system.svc.cluster.local"
       HOMEPAGE_VAR_PIHOLE_API_KEY: "CHANGE_ME"  # Override in secrets/homepage.yaml
+      HOMEPAGE_VAR_N8N_API_KEY: "CHANGE_ME"
 
 # Environment variables from Secret
 envFrom:

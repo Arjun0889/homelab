@@ -21,4 +21,4 @@ helm/secrets/*.yaml
 !helm/secrets/README.md
 
 notes/
-docs/
+# docs/

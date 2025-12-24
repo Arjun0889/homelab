@@ -1,0 +1,38 @@
+main:
+  persistence:
+    enabled: true
+    type: dynamic
+    storageClass: "longhorn"
+    accessMode: ReadWriteOnce
+    size: 2Gi
+  
+  config:
+    GENERIC_TIMEZONE: "America/New_York"
+    N8N_SECURE_COOKIE: "false"
+    WEBHOOK_URL: "http://n8n.home"
+    N8N_HOST: "n8n.home"
+
+  # Use extraEnv for N8N_PORT to override K8s Service injection
+  extraEnv:
+    N8N_PORT:
+      value: "5678"
+
+ingress:
+  enabled: true
+  className: nginx-internal
+  annotations:
+    # Ensure client body size is large enough for file uploads
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  hosts:
+    - host: n8n.home
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1024Mi

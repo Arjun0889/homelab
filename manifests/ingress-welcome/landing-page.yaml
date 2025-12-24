@@ -89,6 +89,11 @@ data:
                 <p>Network-wide ad blocking and DNS management</p>
                 <a href="http://pihole.home">pihole.home</a>
             </div>
+            <div class="service" onclick="window.location.href='http://n8n.home'">
+                <h2>n8n Automation</h2>
+                <p>Workflow automation for technical people</p>
+                <a href="http://n8n.home">n8n.home</a>
+            </div>
             <div class="footer">
                 <p>Nginx Ingress <span class="status">✓ Online</span></p>
                 <p style="margin-top: 8px; font-size: 0.85em;">IP: 10.0.0.249 | K3s Cluster</p>

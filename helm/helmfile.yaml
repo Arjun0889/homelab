@@ -14,6 +14,7 @@ repositories:
   - name: jameswynn
     url: https://jameswynn.github.io/helm-charts
 
+
 releases:
   # Load balancer
   - name: metallb
@@ -74,3 +75,14 @@ releases:
       # Secret file (gitignored) - contains API keys not version controlled
       # Helm deep merges objects, so secrets file overrides values from homepage.values.yaml
       - ./secrets/homepage.yaml
+
+  # n8n Automation Platform
+  - name: n8n
+    namespace: n8n-system
+    chart: oci://8gears.container-registry.com/library/n8n
+    version: 2.0.1
+    createNamespace: true
+    values:
+      - ./values/n8n.values.yaml
+      # Secret file (gitignored) - override for sensitive env vars
+      - ./secrets/n8n.yaml
