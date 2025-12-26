@@ -8,9 +8,9 @@ main:
   
   config:
     GENERIC_TIMEZONE: "America/New_York"
-    N8N_SECURE_COOKIE: "false"
-    WEBHOOK_URL: "http://n8n.home"
-    N8N_HOST: "n8n.home"
+    N8N_SECURE_COOKIE: "false"  # False allows both HTTP (.home) and HTTPS (.arjunreddie.com)
+    WEBHOOK_URL: "https://n8n.arjunreddie.com"
+    N8N_HOST: "n8n.arjunreddie.com"
 
   # Use extraEnv for N8N_PORT to override K8s Service injection
   extraEnv:
@@ -24,7 +24,7 @@ ingress:
     # Ensure client body size is large enough for file uploads
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"
   hosts:
-    - host: n8n.home
+    - host: n8n.arjunreddie.com
       paths:
         - path: /
           pathType: ImplementationSpecific

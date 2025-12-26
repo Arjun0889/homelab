@@ -162,7 +162,8 @@ metadata:
 spec:
   ingressClassName: nginx-internal
   rules:
-  - http:  # No host specified = catch-all for bare IP
+  - host: "ingress.home"  # Shows what services are managed by Nginx Ingress
+    http:
       paths:
       - path: /
         pathType: Prefix

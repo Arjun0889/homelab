@@ -1,0 +1,51 @@
+---
+# Cloudflare Tunnel Deployment
+# The Secret is created by tunnel-secret.yaml (gitignored)
+# To deploy:
+#   1. kubectl apply -f tunnel-secret.yaml (contains actual token)
+#   2. kubectl apply -f tunnel.yaml (this file - deployment only)
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cloudflare-system
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: cloudflare-system
+  labels:
+    app: cloudflared
+spec:
+  replicas: 2  # High availability - runs on both nodes
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      containers:
+      - name: cloudflared
+        image: cloudflare/cloudflared:latest
+        args:
+          - tunnel
+          - --no-autoupdate
+          - run
+          - --token
+          - $(TUNNEL_TOKEN)
+        env:
+          - name: TUNNEL_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: tunnel-token
+                key: token
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+

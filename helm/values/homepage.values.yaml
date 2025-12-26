@@ -45,7 +45,7 @@ ingress:
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /
     hosts:
-      - host: homepage.home
+      - host: homepage.arjunreddie.com
         paths:
           - path: /
             pathType: Prefix
