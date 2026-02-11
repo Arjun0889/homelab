@@ -25,3 +25,4 @@ docs/
 
 # Cloudflare Tunnel Secret (contains actual token)
 manifests/cloudflare-tunnel/tunnel-secret.yaml
+finance/

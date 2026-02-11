@@ -5,6 +5,7 @@ DNS1: "10.0.0.1"
 # Enable persistent storage for Pi-hole data
 persistentVolumeClaim:
   enabled: true
+  size: 2Gi  # Increased from default 500Mi - needed for extensive blocklists
 
 # Ingress for web UI
 ingress:
@@ -39,6 +40,10 @@ replicaCount: 1
 # For new deployments, create pihole.secrets.yaml with:
 #   adminPassword: "your-password-here"
 adminPassword: "CHANGE_ME"
+
+# FTL configuration for log retention
+ftl:
+  MAXDBDAYS: 7  # Keep query logs for 7 days instead of default 365
 
 # Additional adlists for comprehensive ad blocking
 adlists:
@@ -75,22 +80,16 @@ adlists:
   - https://lists.cyberhost.uk/malware.txt
   - https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt
   - https://v.firebog.net/hosts/Prigent-Malware.txt
-  - https://raw.githubusercontent.com/jarelllama/Scam-Blocklist/main/lists/wildcard_domains/scams.txt
   - https://v.firebog.net/hosts/RPiList-Phishing.txt
   - https://bitbucket.org/ethanr/dns-blacklists/raw/8575c9f96e5b4a1308f2f12394abd86d0927a4a0/bad_lists/Mandiant_APT1_Report_Appendix_D.txt
   - https://raw.githubusercontent.com/tg12/pihole-phishtank-list/master/list/phish_domains.txt
-  - https://raw.githubusercontent.com/HorusTeknoloji/TR-PhishingList/master/url-lists.txt
   
   # Suspicious & Tracking
   - https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt
   - https://hostfiles.frogeye.fr/firstparty-trackers-hosts.txt
   
-  # AdGuard DNS Filters (what AdGuard DNS actually uses!)
+  # AdGuard DNS Filters (comprehensive, replaces many individual lists)
   - https://adguardteam.github.io/AdGuardSDNSFilter/Filters/filter.txt
-  - https://raw.githubusercontent.com/AdguardTeam/AdguardFilters/master/MobileFilter/sections/adservers.txt
-  
-  # OISD - Very comprehensive, blocks CNAME cloaking (similar to AdGuard DNS)
-  - https://big.oisd.nl/domainswild
 
 # Block DNS-over-HTTPS endpoints to prevent apps from bypassing Pi-hole
 blacklist:
@@ -110,3 +109,6 @@ blacklist:
   # AdGuard DoH (blocks bypassing to AdGuard when you want local Pi-hole)
   - dns.adguard.com
   - dns-family.adguard.com
+  # Amazon tracking/telemetry
+  - unagi-na.amazon.com
+  - ipv6.unagi-na.amazon.com
